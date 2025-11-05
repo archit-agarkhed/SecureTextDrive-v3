@@ -1,0 +1,221 @@
+/* Login Panel */
+.blue-input {
+  position: relative;
+  width: 100%;
+  height: 48px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  outline: none;
+  box-sizing: border-box;
+  font-size: 18px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  color: var(--text);
+}
+
+.inp-label {
+  position: relative;
+
+  height: 16px;
+  display: flex;
+  font-family: "Inter", system-ui, -apple-system, Segoe UI, Arial, sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 16px;
+  color: #94a3b8;
+}
+
+.box {
+  align-items: center;
+  overflow: hidden;
+  gap: 0.85em;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 28px 28px 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.18);
+  width: 100%;
+  max-width: 420px;
+}
+
+.icon {
+  width: 100%;
+  height: 64px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.login_btn_div {
+  margin-top: 1em;
+  position: relative;
+  width: 100%;
+  gap: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.login_btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 46px;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  box-sizing: border-box;
+  cursor: pointer;
+  font-weight: 600;
+  box-shadow: 0 10px 24px rgba(29, 78, 216, 0.28);
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.login_btn:hover { transform: translateY(-1px); box-shadow: 0 14px 30px rgba(29,78,216,0.34); }
+
+.btn_txt {
+  font-family: "Inter", system-ui, -apple-system, Segoe UI, Arial, sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1;
+  color: #ffffff;
+}
+
+.login_btn_div a {
+  font-family: "Inter", system-ui, -apple-system, Segoe UI, Arial, sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 16px;
+  color: #000000;
+}
+
+/* Container */
+.container {
+  display: flex;
+  min-height: 100vh;
+  padding: 24px 16px;
+  margin: 0 auto;
+  gap: 24px;
+  align-items: center;
+  justify-content: center;
+  max-width: 1100px;
+}
+
+.right-panel {
+  flex: 1; /* Allows each item to grow equally */
+  display: flex; /* Enables flexbox on child items */
+  justify-content: center; /* Centers content horizontally */
+  align-items: center; /* Centers content vertically */
+  background: linear-gradient(180deg, #f7faff 0%, #f5f7ff 100%);
+  border-radius: 16px;
+  background: transparent;
+}
+.left-panel {
+  flex: 0.4; /* proportion for desktop */
+  display: flex; /* Enables flexbox on child items */
+  justify-content: center; /* Centers content horizontally */
+  align-items: center; /* Centers content vertically */
+  flex-direction: column;
+  /* Rectangle 3 */
+  width: 360px;
+  background: radial-gradient(1200px 300px at -10% 10%, rgba(99,102,241,0.18), transparent),
+              radial-gradient(1000px 260px at 120% -10%, rgba(56,189,248,0.14), transparent);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 16px;
+}
+
+.left-panel h3 {
+  /* NEW USER? */
+  font-family: "Inter", system-ui, -apple-system, Segoe UI, Arial, sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: 0.4px;
+  margin: 10px;
+  color: var(--text);
+}
+
+body {
+  padding: 0;
+  margin: 0;
+  background: linear-gradient(135deg, #eef2ff, #e0f2fe);
+}
+
+.signup_div {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.signup_btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 220px;
+  height: 48px;
+  background: #ffffff;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-radius: 12px;
+  box-sizing: border-box;
+  cursor: pointer;
+  font-weight: 600;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.sbtn_txt {
+  font-family: "Inter", system-ui, -apple-system, Segoe UI, Arial, sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 1;
+  color: #0f172a;
+}
+
+.empty {
+  flex: 0.9;
+}
+
+.fbtn_txt {
+  font-family: "Inter", system-ui, -apple-system, Segoe UI, Arial, sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 1;
+  color: #0f172a;
+}
+.blue-input1 {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  background: #dbecff;
+  border: none;
+  outline: none;
+  box-sizing: border-box;
+  font-size: 25px;
+  padding: 10px;
+  text-align: center;
+}
+.blue-input1::-webkit-inner-spin-button,
+.blue-input1::-webkit-outer-spin-button {
+  -webkit-appearance: none; /* Hides the spinner */
+  margin: 0; /* Prevents default margin */
+}
+
+/* Focus styles */
+.blue-input:focus {
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.25);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .container { flex-direction: column; gap: 16px; padding-top: 32px; }
+  .left-panel { width: 100%; padding: 16px; order: 2; }
+  .right-panel { width: 100%; order: 1; }
+  .blue-input { width: 100%; }
+}

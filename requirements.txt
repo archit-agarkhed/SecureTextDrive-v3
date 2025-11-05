@@ -1,0 +1,11 @@
+flask
+flask-cors
+flask-mail
+psycopg2-binary
+rsa
+cryptography
+requests
+Flask-Session
+openai
+google-generativeai
+

@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Text Drive</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="icon" href="{{ url_for('static', filename='images/img.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='homepage.css') }}">
+</head>
+<body data-can-access="{{ 'true' if can_access_data else 'false' }}">
+    <div class="container container-lg">
+        <!-- Header Section -->
+        <div class="rect1 glassbar">
+            <div class="logo">
+                <img src="{{ url_for('static', filename='images/img.png') }}" alt="Folder Icon" width="50">
+            </div>
+            <div class="auth-options">
+                <div id="modeSwitch" style="display:flex;align-items:center;gap:8px;margin-right:12px;">
+                    <span id="modeBadge" class="card" style="padding:6px 10px;border-radius:999px;font-size:12px;font-weight:700;">mode</span>
+                    <button class="login-btn mode-btn" data-mode="full" style="height:34px;padding:0 10px;">Full</button>
+                    <button class="login-btn mode-btn" data-mode="restricted" style="height:34px;padding:0 10px;opacity:0.85">Restricted</button>
+                </div>
+                {% if email %}
+                    <span class="user-name">{{ email.split('@')[0] }}</span>
+                    <a class="logout-btn" href="{{ url_for('views.logout') }}">Logout</a>
+                {% else %}
+                    <a class="login-btn" href="{{ url_for('views.login') }}">Login</a>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="header-text">
+            <div>
+                <h1>SECURE TEXT DRIVE</h1>
+                <p>Access your files from anywhere in the world online</p>
+                <div style="margin-top: 10px; padding: 10px; background: rgba(76, 175, 80, 0.1); border-radius: 5px; border-left: 4px solid #4CAF50;">
+                    <small style="color: #2E7D32;">
+                        🔐 <strong>Secure Architecture:</strong> Private keys stored locally on your device. 
+                        Server never has access to your private keys or decrypted files.
+                    </small>
+                </div>
+            </div>
+            <img src="{{ url_for('static', filename='images/img.png') }}" alt="Folder Icon">
+        </div>
+
+        <!-- Files Section -->
+        <main>
+            <section class="files-section">
+                <h2>Saved Files</h2>
+                <div class="file-grid">
+                    <div class="file-card" id="add-new-file-btn" {% if not can_access_data %}style="opacity:0.5;pointer-events:none;"{% endif %}>+</div>
+                    <input type="file" id="file-input" style="display: none;">
+
+                    {% if file_list %}
+                        {% for file in file_list %}
+                            <div class="file-card">
+                                <a href="#" class="file-link" data-filename="{{ file['filename'] }}">
+                                    {{ file['filename'] }}
+                                    <span style="font-size: 12px; color: #4CAF50;">🔐</span>
+                                </a>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        {% if can_access_data %}
+                        <p style="margin-left: 20px; color: #64748b;">No files available.</p>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal for displaying decrypted content -->
+    <div id="decryptedContentModal" class="modal">
+        <div class="modal-content card">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Decrypted Content</h2>
+            <pre id="content-display" style="white-space: pre-wrap; background: #f5f5f5; padding: 10px; border: 1px solid #ddd;"></pre>
+            <button id="downloadBtn" style="margin-top: 10px;">Download as TXT</button>
+            <button id="deleteBtn"  style="margin-top: 10px; background: red; " onclick="deleteFile(currentFilename)">Delete</button>
+            <button id="summarizeBtn" class="btn btn-primary" style="margin-top: 10px;">Summarize</button>
+            <h3 id="summary-title" style="margin-top:12px; display:none;">Summary</h3>
+            <pre id="summary-display" style="display:none; white-space: pre-wrap; background: #f5f5f5; padding: 10px; border: 1px solid #ddd;"></pre>
+            <button id="downloadSummaryBtn" style="display:none; margin-top: 8px;">Download summary.txt</button>
+        </div>
+    </div>
+
+<div id="loadingIndicator" style="display: none;">
+   <span class="loader"></span>
+</div>
+
+    <div id="notification-container" style="position: fixed; right: 20px; bottom: 20px; z-index: 1000;"></div>
+
+<script>
+    let currentFilename;
+    window.canAccessData = (document.body.dataset.canAccess === 'true');
+
+function showNotification(message, color = '#F44336') { // Default to green if no color is provided
+    const notification = document.createElement("div");
+    notification.classList.add("notification");
+    notification.innerText = message;
+
+    // Set the background color of the notification
+    notification.style.backgroundColor = color;
+
+    // Append the notification to the container
+    document.getElementById("notification-container").appendChild(notification);
+
+    // Automatically hide the notification after a few seconds
+    setTimeout(() => {
+        notification.classList.add("hide");
+        // Remove notification from DOM after animation
+        notification.addEventListener("transitionend", () => {
+            notification.remove();
+        });
+    }, 3000); // Adjust time as necessary
+}
+
+// Backend mode handling
+function refreshModeBadge() {
+    fetch("{{ url_for('views.get_backend') }}")
+        .then(r => r.json())
+        .then(d => {
+            const badge = document.getElementById('modeBadge');
+            if (!badge) return;
+            const mode = (d.mode || 'custom');
+            badge.textContent = mode.toUpperCase();
+            badge.style.border = '1px solid var(--border)';
+            badge.style.background = mode === 'full' ? 'rgba(34,197,94,0.12)' : (mode === 'restricted' ? 'rgba(234,179,8,0.12)' : 'rgba(59,130,246,0.12)');
+        })
+        .catch(() => {});
+}
+
+function switchMode(mode) {
+    fetch("{{ url_for('views.set_backend') }}", {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode })
+    })
+    .then(r => r.json())
+    .then(() => {
+        refreshModeBadge();
+        showNotification('Switched backend: ' + mode, '#4CAF50');
+        setTimeout(() => { window.location.reload(); }, 300);
+    })
+    .catch(err => showNotification('Failed to switch backend: ' + err.message));
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    refreshModeBadge();
+    // Bind mode switch buttons
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+        btn.addEventListener('click', () => switchMode(btn.dataset.mode));
+    });
+    // Bind file preview links
+    document.querySelectorAll('.file-link').forEach(a => {
+        a.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (!window.canAccessData) {
+                showNotification('Restricted mode: file access is disabled.');
+                return;
+            }
+            const fn = a.getAttribute('data-filename');
+            previewFile(fn);
+        });
+    });
+});
+
+    // 2FA removed
+
+    // Function to upload file
+    function uploadFile(email, file) {
+        const reader = new FileReader();
+        document.getElementById('loadingIndicator').style.display = 'block';
+        document.body.classList.add('loading');
+
+        reader.onload = function (e) {
+            const fileContent = e.target.result;
+
+            fetch("{{ url_for('views.upload_file') }}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    email: email,
+                    filename: file.name,
+                    content: fileContent
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                document.getElementById('loadingIndicator').style.display = 'none';
+                       document.body.classList.remove('loading');
+                    throw new Error('Network response was not ok: ' + response.statusText);
+
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.message) {
+                    showNotification(data.message, '#4CAF50');
+                    document.getElementById('loadingIndicator').style.display = 'none';
+                    document.body.classList.remove('loading');
+                    location.reload();
+                } else {
+                   document.getElementById('loadingIndicator').style.display = 'none';
+                    document.body.classList.remove('loading');
+                    showNotification('Error: ' + (data.error || 'An unknown error occurred.'));
+                }
+            })
+            .catch(error => {
+            document.getElementById('loadingIndicator').style.display = 'none';
+                       document.body.classList.remove('loading');
+                console.error("Error:", error);
+                showNotification('An error occurred while sending the file to the backend: ' + error.message);
+            });
+        };
+
+        reader.readAsText(file);
+    }
+
+    // Trigger file input dialog
+    document.getElementById('add-new-file-btn').addEventListener('click', function () {
+        const email = '{{ email }}';
+
+        if (email === 'None') {
+            showNotification("Please log in to upload files.");
+            return;
+        }
+        if (!window.canAccessData) {
+            showNotification('Restricted mode: uploads are disabled.');
+            return;
+        }
+
+        document.getElementById('file-input').click();
+    });
+
+    // Handle file selection
+    document.getElementById('file-input').addEventListener('change', function (event) {
+        const email = '{{ email }}';
+        const file = event.target.files[0];
+
+        if (file) {
+            uploadFile(email, file);
+        }
+    });
+
+    function previewFile(filename) {
+        if (!window.canAccessData) {
+            showNotification('Restricted mode: file access is disabled.');
+            return;
+        }
+        const email = '{{ email }}';
+
+        fetch("{{ url_for('views.preview_file') }}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ filename: filename })
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                throw new Error('File not found or error occurred');
+            }
+        })
+        .then(data => {
+            const contentDisplay = document.getElementById('content-display');
+            if (contentDisplay) { // Check if element exists
+                contentDisplay.innerText = data.message;
+                document.getElementById('decryptedContentModal').style.display = "block";
+
+                 currentFilename = filename;
+
+                // Setup download button
+                const downloadBtn = document.getElementById('downloadBtn');
+                downloadBtn.onclick = function () {
+                    const blob = new Blob([data.message], { type: 'text/plain' });
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = filename; // Use the filename from the preview
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+                };
+
+                // Setup summarize button
+                const summarizeBtn = document.getElementById('summarizeBtn');
+                const summaryTitle = document.getElementById('summary-title');
+                const summaryDisplay = document.getElementById('summary-display');
+                const downloadSummaryBtn = document.getElementById('downloadSummaryBtn');
+                // reset summary area each open
+                summaryTitle.style.display = 'none';
+                summaryDisplay.style.display = 'none';
+                summaryDisplay.innerText = '';
+                downloadSummaryBtn.style.display = 'none';
+
+                summarizeBtn.onclick = function () {
+                    if (!window.canAccessData) {
+                        showNotification('Restricted mode: summarization is disabled.');
+                        return;
+                    }
+                    const text = data.message || '';
+                    if (!text.trim()) {
+                        showNotification('Nothing to summarize.');
+                        return;
+                    }
+                    summarizeBtn.disabled = true;
+                    summarizeBtn.textContent = 'Summarizing...';
+                    fetch("{{ url_for('views.summarize') }}", {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ text })
+                    })
+                    .then(r => r.json())
+                    .then(res => {
+                        if (res.summary) {
+                            summaryTitle.style.display = 'block';
+                            summaryDisplay.style.display = 'block';
+                            summaryDisplay.innerText = res.summary;
+                            downloadSummaryBtn.style.display = 'inline-block';
+                            downloadSummaryBtn.onclick = function () {
+                                const blob = new Blob([res.summary], { type: 'text/plain' });
+                                const url = window.URL.createObjectURL(blob);
+                                const a = document.createElement('a');
+                                a.href = url;
+                                a.download = 'summary_' + filename;
+                                document.body.appendChild(a);
+                                a.click();
+                                a.remove();
+                                window.URL.revokeObjectURL(url);
+                            };
+                        } else {
+                            showNotification(res.error || 'Failed to summarize.');
+                        }
+                    })
+                    .catch(err => showNotification('Summarization error: ' + err.message))
+                    .finally(() => { summarizeBtn.disabled = false; summarizeBtn.textContent = 'Summarize'; });
+                };
+            } else {
+                console.error('Error: content-display element not found.');
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            showNotification('An error occurred while fetching the file: ' + error.message);
+        });
+    }
+
+
+
+function deleteFile(filename) {
+        if (!window.canAccessData) {
+            showNotification('Restricted mode: delete is disabled.');
+            return;
+        }
+        const email = '{{ email }}'; // Retrieve email or any identifier if needed
+
+
+            fetch("{{ url_for('views.delete_file') }}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ filename: filename, email: email })
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('Error occurred while deleting the file');
+                }
+            })
+            .then(data => {
+                showNotification(data.message, '#4CAF50'); // Notify the user of the success or error message
+                // Optionally, refresh the file list or update the UI
+                location.reload(); // Reload the page to refresh the file list
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                showNotification('An error occurred while deleting the file: ' + error.message);
+            });
+
+    }
+
+    function closeModal() {
+        document.getElementById('decryptedContentModal').style.display = "none";
+    }
+
+    // Close modal when clicking outside of it
+    window.onclick = function(event) {
+        const modal = document.getElementById('decryptedContentModal');
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    };
+</script>
+</body>
+</html>

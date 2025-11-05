@@ -1,0 +1,90 @@
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                           SECURETEXTDRIVE DATABASE SCHEMA                       │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+📊 DATABASE: ascscs_securedrive
+🌐 HOST: postgresql-ascscs.alwaysdata.net
+🔌 PORT: 5432
+👤 USER: ascscs
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                                  TABLES                                        │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                                USERS TABLE                                     │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│  Column Name    │ Data Type │ Nullable │ Description                           │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│  email          │ VARCHAR   │ NO       │ Primary Key, User Identifier         │
+│  password       │ VARCHAR   │ YES      │ Affine Cipher Encrypted Password     │
+│  auth           │ BOOLEAN   │ YES      │ Authentication Status (TRUE/FALSE)   │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                               FILECON TABLE                                    │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│  Column Name    │ Data Type │ Nullable │ Description                           │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│  email          │ VARCHAR   │ YES      │ User Identifier (Foreign Key)        │
+│  fpath          │ VARCHAR   │ YES      │ File Path/Name                       │
+│  fcon           │ BYTEA     │ YES      │ RSA Encrypted File Content (Binary)  │
+│  pubkey         │ TEXT      │ YES      │ RSA Public Key (PEM Format)          │
+│  encryption_method│ VARCHAR │ YES      │ Encryption Type (e.g., "RSA")        │
+│  key_size       │ INTEGER   │ YES      │ RSA Key Size (1024 or 2048 bits)     │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                              SECURITY FEATURES                                │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+🔐 PASSWORD SECURITY:
+   • Passwords encrypted using Affine Cipher (key=23)
+   • Educational demonstration of classical cryptography
+   • Easily reversible for password recovery
+
+🛡️ FILE SECURITY:
+   • File contents encrypted using RSA (1024 or 2048-bit keys)
+   • Public/Private key pairs stored securely
+   • Digital signatures for integrity verification
+   • Binary storage of encrypted content
+
+👥 USER ISOLATION:
+   • Files isolated by user email
+   • Users can only access their own data
+   • Database-level access control
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                               SAMPLE DATA                                      │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+USERS TABLE:
+┌─────────────────────┬─────────────────────┬───────┐
+│ Email               │ Encrypted Password  │ Auth  │
+├─────────────────────┼─────────────────────┼───────┤
+│ user1@example.com   │ XyZ123@#            │ TRUE  │
+│ user2@example.com   │ AbC456!@            │ TRUE  │
+│ admin@example.com   │ DeF789$%            │ TRUE  │
+└─────────────────────┴─────────────────────┴───────┘
+
+FILECON TABLE:
+┌─────────────────────┬──────────────┬──────────┬──────────────────┬──────────┐
+│ Email               │ Filename     │ Method   │ Key Size         │ Content  │
+├─────────────────────┼──────────────┼──────────┼──────────────────┼──────────┤
+│ user1@example.com   │ secret.txt   │ RSA      │ 2048             │ Binary   │
+│ user1@example.com   │ notes.doc    │ RSA      │ 1024             │ Binary   │
+│ user2@example.com   │ report.pdf   │ RSA      │ 2048             │ Binary   │
+└─────────────────────┴──────────────┴──────────┴──────────────────┴──────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                              DEMONSTRATION POINTS                             │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+1. 🔍 Show that passwords are encrypted (not plaintext)
+2. 🔍 Demonstrate affine cipher decryption in real-time
+3. 🔍 Show RSA key storage in PEM format
+4. 🔍 Display encrypted file content as binary data
+5. 🔍 Explain user isolation and access control
+6. 🔍 Show database statistics and file sizes
+7. 🔍 Demonstrate the difference between weak (affine) and strong (RSA) encryption
+
